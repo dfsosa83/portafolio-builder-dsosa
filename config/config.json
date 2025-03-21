@@ -1,0 +1,10 @@
+{
+    "api_keys": {
+        "fred_api_key": "",
+        "alpha_vantage_key": ""
+    },
+    "features": {
+        "enable_macro_analysis": true,
+        "enable_technical_analysis": true
+    }
+}

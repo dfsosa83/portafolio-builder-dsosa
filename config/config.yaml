@@ -1,0 +1,6 @@
+api_keys:
+  alpha_vantage_key: ''
+  fred_api_key: ''
+features:
+  enable_macro_analysis: true
+  enable_technical_analysis: true
