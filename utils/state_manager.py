@@ -25,7 +25,7 @@ class DataManager:
                                                             # "EPS/Price (%)",
                                                             # "Quick Ratio",
                                                             # "Free Cash Flow ($M)",
-                                                            "P/E Ratio",
+                                                            # "P/E Ratio",
                                                             # "Recommendation",
                                                             "Asset Class",
                                                             # "Profile Match",
@@ -35,7 +35,7 @@ class DataManager:
         return st.session_state[self.key]
     
     
-    def process_data(data):
+    def process_data(data, asset_class):
         
         symbol = data.columns[-1]
         data = pd.pivot_table(data, columns='Symbol', values=symbol, aggfunc='sum').reset_index()
@@ -51,51 +51,24 @@ class DataManager:
                                         # "EPS/Price (%)",
                                         # "Quick Ratio",
                                         # "Free Cash Flow ($M)",
-                                        "P/E Ratio",
+                                        # "P/E Ratio",
                                         # "Recommendation",
                                         "Asset Class",
                                         # "Profile Match",
                                         "Allocation (%)"
                                         ]).fillna(0)
         
-    
+        data['Asset Class'] = asset_class
+        
         return data
         
     
     def add_row(self, data):
+        
+       print(data)
        new_row = data
        st.session_state[self.key] = pd.concat([self.df, new_row], ignore_index=True)
     
     
     
     
-    
-    """
-    
-    # st.dataframe(st.session_state.session_frame, hide_index=True)
-    
-    
-    
-    
-    cols= init_session_df.columns
-    
-    
-    edited_df = st.data_editor(
-        st.session_state.session_frame,
-        column_config={
-            # "Risk Profile": st.column_config.NumberColumn("Risk Profile"),
-            "Weight (%)": st.column_config.NumberColumn("Weight (%)", min_value=0),
-        },
-        
-        disabled=cols[:-1],  # Disable editing on other columns if needed
-        hide_index=True,
-        num_rows = 'dynamic'
-    )
-    
-    total_w = edited_df['Weight (%)'].sum()
-    
-    
-    
-    st.text(f"Total Asset Allocation: {total_w}%")
-    
-    """

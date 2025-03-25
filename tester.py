@@ -4,6 +4,17 @@ Created on Tue Mar 18 13:36:46 2025
 
 @author: rblasser
 """
+
+
+from utils.db_manager import PortfolioDB
+
+db = PortfolioDB()
+
+
+
+
+
+
 import yfinance as yf
 
 from utils.data_fetcher import DataFetcher as fetch

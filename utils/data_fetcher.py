@@ -65,13 +65,19 @@ class DataFetcher:
         
             hist = ticker.history(start=start, end=end, interval='1d')
             hist = hist.reindex(columns=['Close'])
-            hist['Returns_daily'] = hist['Close'].pct_change().fillna(0)
-            hist['Returns'] = (1 + hist['Returns_daily']).cumprod() - 1
-            hist = hist.drop(columns=['Returns_daily'])
+            #hist['Returns_daily'] = hist['Close'].pct_change().fillna(0)
+            hist['Returns_monthly'] = hist['Close'].resample('M').last().pct_change().fillna(0)
+            
+            hist['Returns'] = (1 + hist['Returns_monthly']).cumprod() - 1
+            # hist['Returns'] = hist['Returns_daily'].cumsum()
+            hist = hist.drop(columns=['Returns_monthly'])
             
             # print(hist[['Returns_daily','Returns']])    
             
         return hist
+    
+    
+        
 
  
 # d = DataFetcher.get_prices('WTW', 5)

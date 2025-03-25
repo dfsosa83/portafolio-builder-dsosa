@@ -104,7 +104,7 @@ class Utility:
             color = "#FF5733"
         
         if serie == 'Returns':
-            data = data.rename(columns={'Returns':'Cumulative Returns'})
+            data = data.rename(columns={'Returns':'Monthly Cumulative Returns'})
             y_label = data[data.columns[2]].name
             color = "#49cb8e"
         
