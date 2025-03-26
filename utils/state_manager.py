@@ -35,6 +35,14 @@ class DataManager:
         return st.session_state[self.key]
     
     
+    @df.setter  
+    def df(self, value):
+        if not isinstance(value, pd.DataFrame):
+            raise ValueError("Value must be a pandas DataFrame")
+        st.session_state[self.key] = value
+       
+       
+    
     def process_data(data, asset_class):
         
         symbol = data.columns[-1]
@@ -68,7 +76,6 @@ class DataManager:
        print(data)
        new_row = data
        st.session_state[self.key] = pd.concat([self.df, new_row], ignore_index=True)
-    
     
     
     

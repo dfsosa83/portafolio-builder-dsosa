@@ -6,6 +6,31 @@ Created on Tue Mar 18 13:36:46 2025
 """
 
 
+
+from utils.utility import Utility as util
+from utils.data_fetcher import DataFetcher as fetch
+
+
+stock = 'AAOI'
+years = 5
+
+df2 = fetch.get_prices(stock,years)
+
+
+util.popup_graphly(stock,years,df2,'Returns')
+
+
+
+df2['Date'] = df2.index
+
+df2['LastDate'] = df2.apply(lambda x: df2[df2['Date'].dt.to_period('M') == x['Date'].to_period('M')]['Date'].max(), axis=1)
+df2['isLastDate'] = df2['Date'] == df2['LastDate']
+
+
+
+
+
+
 from utils.db_manager import PortfolioDB
 
 db = PortfolioDB()
@@ -16,7 +41,7 @@ db = PortfolioDB()
 
 
 import yfinance as yf
-
+from datetime import datetime, timedelta
 from utils.data_fetcher import DataFetcher as fetch
 import pandas as pd
 
@@ -35,8 +60,15 @@ df1 = pd.DataFrame.from_dict(d1, orient='columns')
 
 
 # Create a Ticker object for a specific stock symbol
-query = 'NVDA'
+query = 'VOO'
 ticker = yf.Ticker(query)
+years = 5
+end = datetime.today().strftime('%Y-%m-%d')
+start = (datetime.today() - timedelta(days=years*365)).strftime('%Y-%m-%d')
+
+
+d1 = ticker.history(start=start, end=end, interval='1d')
+
 
 news = ticker.get_news()
 

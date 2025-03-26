@@ -66,7 +66,7 @@ class DataFetcher:
             hist = ticker.history(start=start, end=end, interval='1d')
             hist = hist.reindex(columns=['Close'])
             #hist['Returns_daily'] = hist['Close'].pct_change().fillna(0)
-            hist['Returns_monthly'] = hist['Close'].resample('M').last().pct_change().fillna(0)
+            hist['Returns_monthly'] = hist['Close'].resample('ME').last().pct_change().fillna(0)
             
             hist['Returns'] = (1 + hist['Returns_monthly']).cumprod() - 1
             # hist['Returns'] = hist['Returns_daily'].cumsum()

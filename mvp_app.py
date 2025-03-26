@@ -87,10 +87,10 @@ else:
                     
                     selected_company = st.selectbox("Select an Asset.", securities)
                     
-                    # selected_company = 'PRIVAL FINANCE SIXTEN PROPERTIES'
+                    # selected_company = 'LETRAS REP PANAMA 0 08/14/2020'
                     
                     if selected_company != 'None':
-                        res2 = res1[res1['Nombre']==selected_company]
+                        res2 = res1[res1['Nombre']==selected_company].iloc[0]
                         
                         res2b = res2.T
                         res2b.columns=["Asset Information."]
@@ -102,12 +102,12 @@ else:
                             res3 = pd.DataFrame(columns=["Symbol", "Name",
                                                         "Last Price",
                                                             "Score",
-                                                            "P/E Ratio",
+                                                            # "P/E Ratio",
                                                             "Asset Class",
                                                             "Allocation (%)"],index=range(1))
                             
-                            isin = res2['ISIN'].iloc[0]
-                            nombre = res2['Nombre'].iloc[0]
+                            isin = res2['ISIN']
+                            nombre = res2['Nombre']
                             last_price = 0
                             Score = 0
                             pe_ration = 0
@@ -324,6 +324,10 @@ else:
 
     st.divider()
     
+    with st.expander('Add Custom Asset.'):
+        st.dataframe(pd.DataFrame())
+
+    
     if profile_option is not None:
         
         dfr = pd.DataFrame(columns=['ETFs',
@@ -364,7 +368,16 @@ else:
         num_rows = 'dynamic'
     )
     
-    total_w = edited_df['Allocation (%)'].sum()
+    # NEW SESSION DATAFRAME
+    manager.df = edited_df
+    
+    # AGGREGATE BY ASSET CLASS
+    
+    agg_df = manager.df.groupby('Asset Class')['Allocation (%)'].sum()
+    print(agg_df)
+    
+    
+    total_w = manager.df['Allocation (%)'].sum()
     
     st.text(f"Total Asset Allocation: {total_w}%")
     

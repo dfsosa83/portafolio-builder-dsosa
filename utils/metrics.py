@@ -14,11 +14,16 @@ class StockMetrics:
             stock = yf.Ticker(symbol)
             info = stock.info
             
+            if info.get('quoteType') == 'ETF':
+                price_type = 'navPrice'
+            else:
+                price_type = 'currentPrice'
+            
             # Calculate metrics
             metrics = {
                 # 'Symbol': symbol,
                 # 'Company': info.get('longName', 'N/A'),
-                'Last Price': round(info.get('currentPrice', 1), 2),
+                'Last Price': round(info.get(f'{price_type}', 1), 2),
                 'Score': self._calculate_score(info),
                 'ROE (%)': round(info.get('returnOnEquity', 0) * 100, 2),
                 'Operating Margin (%)': round(info.get('operatingMargins', 0) * 100, 2),
