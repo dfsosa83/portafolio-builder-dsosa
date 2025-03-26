@@ -347,9 +347,46 @@ else:
         # st.text(definicion)
         
         with st.expander(f'Allocation Limits for {profile_option} Profile.'):
-            agg_classes['Allocated'] = 0
-            agg_classes['Status'] = 0
-            st.dataframe(agg_classes, hide_index=True)
+            agg_classes[profile_option] = agg_classes[profile_option] * 100
+
+            agg_classes = agg_classes.rename(columns={profile_option:f"{profile_option} (%)"})
+            
+            agg_classes = agg_classes.set_index('asset_class')
+            
+            # total_row = agg_classes.sum().to_frame().T
+            # total_row.index = ['Total']  # Rename index
+            # agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
+            
+            
+            st.markdown("""
+                <style>
+                .dataframe th, .dataframe td {
+                    text-align: center;
+                }
+                </style>
+                """, unsafe_allow_html=True)
+            
+            # AGG PORTFOLIO BY CLASS
+            agg_port = manager.df.groupby('Asset Class')['Allocation (%)'].sum()
+            
+            agg_classes = agg_classes.merge(agg_port, left_index=True, right_index=True, how='left').fillna(0)
+            
+            
+            # Total
+            total_row = agg_classes.sum().to_frame().T
+            total_row.index = ['Total']  # Rename index
+            agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
+            
+            agg_classes = agg_classes.rename(columns={'Allocation (%)':'Allocated (%)'})
+            
+            # Reset index
+            # agg_classes = agg_classes.reset_index()
+
+            
+            # EXTRA COLUMNS
+            agg_classes['Status'] = agg_classes.apply(lambda row: "✅" if row['Allocated (%)'] <= row[f"{profile_option} (%)"] else "⛔", axis=1)
+            
+            st.dataframe(agg_classes, hide_index=False)
         
     
     st.divider()
