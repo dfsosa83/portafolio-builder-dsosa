@@ -60,16 +60,77 @@ else:
             ('ETFs',
             'Fixed Income',
             'Money Market',
+            'Private Funds',
             'Stocks'),
             index=None,
             placeholder="Select an asset class...",
         )
         
+        # ASSET_CLASS IS FONDOS PRIVAL
+        if asset_class in ['Private Funds']:
+            
+            query = st.text_input("Search a Private Fund.")
+            
+            if len(query) >1:
+                
+                res1 = db.read_fondos_file().fillna(0)
+                res1 = res1[res1['Fondo'].str.upper().str.contains(query.upper())]
+                
+                if len (res1) == 0:
+                    st.warning(f"{query} did not return any results.")
+                
+                else:
+                    fondos = res1['Fondo'].drop_duplicates()
+                    fondos.loc[-1] = 'None'
+                    fondos.index = fondos.index + 1 
+                    fondos = fondos.sort_index()  
+                    
+                    selected_fund = st.selectbox("Select a Fund.", fondos)
+                    
+                    if selected_fund != 'None':
+                        res2 = res1[res1['Fondo']==selected_fund].iloc[0]
+                        
+                        # res2.columns=["Fund Information."]
+                        st.dataframe(res2)
+                        
+                        if st.button("Add to Portfolio.", icon="✅"):
+                            
+                            res3 = pd.DataFrame(columns=["Symbol", "Name",
+                                                        "Last Price",
+                                                            "Sector",
+                                                            # "P/E Ratio",
+                                                            "Asset Class",
+                                                            "Allocation (%)"],index=range(1))
+                            
+                            
+                            res2 = pd.DataFrame(res2).T
+                            
+                            isin = res2['Fondo']
+                            nombre = res2['Fondo']
+                            last_price = res2['Inversión Mínima']
+                            sector = 'Fund'
+                            pe_ration = 0
+                            asset_class = asset_class
+                            alloc = 0
+                            
+                            res3['Symbol'] = isin
+                            res3['Name'] = nombre
+                            res3['Last Price'] = last_price
+                            res3['Sector'] = sector
+                            # res3['P/E Ratio'] = 0
+                            res3['Asset Class'] =  asset_class
+                            res3['Allocation (%)'] = 0
+                            
+                            print("ISIN",isin)
+                            
+                            manager.add_row(res3)
+                        
         
-        # ASSET_CLASS IS NOT IN Stocks or ETFs
-        if asset_class not in ['Stocks', 'ETFs']:   
+        # ASSET_CLASS IS FIXED INCOME
+        elif asset_class in ['Fixed Income']:   
         
             query = st.text_input("Search an Asset." )
+            # res1 = res1[res1['Fondo'].str.upper().str.contains(query.upper())]
             
             if len(query) >1:
 
@@ -101,7 +162,7 @@ else:
                             
                             res3 = pd.DataFrame(columns=["Symbol", "Name",
                                                         "Last Price",
-                                                            "Score",
+                                                            "Sector",
                                                             # "P/E Ratio",
                                                             "Asset Class",
                                                             "Allocation (%)"],index=range(1))
@@ -109,7 +170,7 @@ else:
                             isin = res2['ISIN']
                             nombre = res2['Nombre']
                             last_price = 0
-                            Score = 0
+                            sector = res2['DESC.INDUSTRY']
                             pe_ration = 0
                             asset_class = asset_class
                             alloc = 0
@@ -117,7 +178,7 @@ else:
                             res3['Symbol'] = isin
                             res3['Name'] = nombre
                             res3['Last Price'] = 0
-                            res3['Score'] = 0
+                            res3['Sector'] = sector
                             # res3['P/E Ratio'] = 0
                             res3['Asset Class'] =  asset_class
                             res3['Allocation (%)'] = 0
@@ -347,53 +408,68 @@ else:
         # st.text(definicion)
         
         with st.expander(f'Allocation Limits for {profile_option} Profile.'):
-            agg_classes[profile_option] = agg_classes[profile_option] * 100
-
-            agg_classes = agg_classes.rename(columns={profile_option:f"{profile_option} (%)"})
             
-            agg_classes = agg_classes.set_index('asset_class')
-            
-            # total_row = agg_classes.sum().to_frame().T
-            # total_row.index = ['Total']  # Rename index
-            # agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
-            
-            
-            st.markdown("""
-                <style>
-                .dataframe th, .dataframe td {
-                    text-align: center;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-            
-            # AGG PORTFOLIO BY CLASS
-            agg_port = manager.df.groupby('Asset Class')['Allocation (%)'].sum()
-            
-            agg_classes = agg_classes.merge(agg_port, left_index=True, right_index=True, how='left').fillna(0)
-            
-            
-            # Total
-            total_row = agg_classes.sum().to_frame().T
-            total_row.index = ['Total']  # Rename index
-            agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
-            
-            agg_classes = agg_classes.rename(columns={'Allocation (%)':'Allocated (%)'})
-            
-            # Reset index
-            # agg_classes = agg_classes.reset_index()
-
-            
-            # EXTRA COLUMNS
-            agg_classes['Status'] = agg_classes.apply(lambda row: "✅" if row['Allocated (%)'] <= row[f"{profile_option} (%)"] else "⛔", axis=1)
-            
-            st.dataframe(agg_classes, hide_index=False)
+             if st.button("Evaluate", disabled=False, type="secondary"):
+                agg_classes[profile_option] = agg_classes[profile_option] * 100
+    
+                agg_classes = agg_classes.rename(columns={profile_option:f"{profile_option} (%)"})
+                
+                agg_classes = agg_classes.set_index('asset_class')
+                
+                # total_row = agg_classes.sum().to_frame().T
+                # total_row.index = ['Total']  # Rename index
+                # agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
+                
+                
+                st.markdown("""
+                    <style>
+                    .dataframe th, .dataframe td {
+                        text-align: center;
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
+                
+                # AGG PORTFOLIO BY CLASS
+                agg_port = manager.df.groupby('Asset Class')['Allocation (%)'].sum()
+                
+                agg_classes = agg_classes.merge(agg_port, left_index=True, right_index=True, how='left').fillna(0)
+                
+                
+                # Total
+                total_row = agg_classes.sum().to_frame().T
+                total_row.index = ['Total']  # Rename index
+                agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
+                
+                agg_classes = agg_classes.rename(columns={'Allocation (%)':'Allocated (%)'})
+                
+                # Reset index
+                # agg_classes = agg_classes.reset_index()
+    
+                
+                # EXTRA COLUMNS
+                agg_classes['Status'] = agg_classes.apply(lambda row: "✅" if row['Allocated (%)'] <= row[f"{profile_option} (%)"] else "⛔", axis=1)
+                
+                st.dataframe(agg_classes, hide_index=False)
         
     
     st.divider()
     # st.dataframe(manager.df)
     
 
-    edited_df = st.data_editor(
+    # edited_df = st.data_editor(
+    #     manager.df,
+    #     column_config={
+    #         # "Risk Profile": st.column_config.NumberColumn("Risk Profile"),
+    #         "Allocation (%)": st.column_config.NumberColumn("Allocation (%)", min_value=0),
+    #     },
+        
+    #     disabled=manager.df.columns[:-1],  # Disable editing on other columns if needed
+    #     hide_index=True,
+    #     num_rows = 'dynamic'
+    # )
+    
+    # NEW SESSION DATAFRAME
+    manager.df = st.data_editor(
         manager.df,
         column_config={
             # "Risk Profile": st.column_config.NumberColumn("Risk Profile"),
@@ -404,9 +480,6 @@ else:
         hide_index=True,
         num_rows = 'dynamic'
     )
-    
-    # NEW SESSION DATAFRAME
-    manager.df = edited_df
     
     # AGGREGATE BY ASSET CLASS
     

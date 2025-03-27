@@ -17,7 +17,7 @@ import plotly.express as px
 ICON = os.path.join(os.getcwd(),"assets","360.ico")
 ico = Image.open(ICON)
 
-HEADER = os.path.join(os.getcwd(),"assets","prival_360.png")
+HEADER = os.path.join(os.getcwd(),"assets","prival_logo.png")
 header = Image.open(HEADER)
 
 LINER = os.path.join(os.getcwd(),"assets","header_line.png")
@@ -62,7 +62,7 @@ class Utility:
 
         st.set_page_config(
             layout="wide",
-            page_title="Prival 360 | Portfolio Builder",
+            page_title="Prival | Portfolio Builder",
             page_icon=ico #"👋",
         )
         

@@ -50,6 +50,13 @@ class DataBases:
         return df
     
     
+    def read_fondos_file():
+        
+        db_path = os.path.join(DB_PATH, 'prival_fondos_db.xlsx')
+        
+        df = pd.read_excel(db_path, sheet_name='specs')
+
+        return df
     
     
     

@@ -7,7 +7,7 @@ Created on Wed Mar 19 11:44:05 2025
 
 import streamlit as st
 import pandas as pd
-
+import yfinance as yf
 
 class DataManager:
     
@@ -19,7 +19,7 @@ class DataManager:
         if key not in st.session_state:
             st.session_state[key] = pd.DataFrame(columns=["Symbol", "Name",
                                                         "Last Price",
-                                                            "Score",
+                                                            "Sector",
                                                             # "ROE (%)",
                                                             # "Operating Margin (%)",
                                                             # "EPS/Price (%)",
@@ -53,7 +53,7 @@ class DataManager:
         
         data = data.reindex(columns=["Symbol", "Name",
                                     "Last Price",
-                                        "Score",
+                                        "Sector",
                                         # "ROE (%)",
                                         # "Operating Margin (%)",
                                         # "EPS/Price (%)",
@@ -66,7 +66,15 @@ class DataManager:
                                         "Allocation (%)"
                                         ]).fillna(0)
         
+        
+        stock = yf.Ticker(symbol)
+        info = stock.info
+        
+        sector = info.get('sector', '')
+        
+        
         data['Asset Class'] = asset_class
+        data['Sector'] = sector
         
         return data
         
