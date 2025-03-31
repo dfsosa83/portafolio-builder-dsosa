@@ -8,10 +8,11 @@ Created on Tue Mar 18 09:56:22 2025
 import yfinance as yf
 import requests
 from datetime import datetime, timedelta
-
+import streamlit as st
 
 class DataFetcher:
     
+    @st.cache_data
     def search_stocks(query):
         if not query or len(query) < 2:
             return []
@@ -38,7 +39,7 @@ class DataFetcher:
             print(f"Error searching stocks: {str(e)}")
             return []
     
-    
+    @st.cache_data
     def get_stock_info(symbol):
         try:
             stock = yf.Ticker(symbol)
@@ -53,7 +54,7 @@ class DataFetcher:
             print(f"Error fetching info for {symbol}: {str(e)}")
             return None 
         
-    
+    @st.cache_data
     def get_prices(symbol, years):
         
         end = datetime.today().strftime('%Y-%m-%d')

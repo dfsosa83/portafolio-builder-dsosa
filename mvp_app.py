@@ -12,7 +12,7 @@ import streamlit as st
 from utils.logger import AuthSystem
 from utils.utility import Utility as util
 from utils.state_manager import DataManager
-import streamlit.components.v1 as components
+
 from utils.metrics import StockMetrics as metrics
 from utils.data_fetcher import DataFetcher as fetch
 from utils.db_manager import DataBases as db
@@ -50,9 +50,6 @@ else:
                     
             with st.expander("User Management"):
                 users = auth.get_all_users()
-                # Display user management UI
-        
-        st.button("Logout", on_click=auth.logout, type="primary")
         
         
         asset_class =  st.selectbox(
@@ -73,7 +70,7 @@ else:
             
             if len(query) >1:
                 
-                res1 = db.read_fondos_file().fillna(0)
+                res1 = db.read_assets_funds('prival_funds').fillna(0)
                 res1 = res1[res1['Fondo'].str.upper().str.contains(query.upper())]
                 
                 if len (res1) == 0:
@@ -90,7 +87,6 @@ else:
                     if selected_fund != 'None':
                         res2 = res1[res1['Fondo']==selected_fund].iloc[0]
                         
-                        # res2.columns=["Fund Information."]
                         st.dataframe(res2)
                         
                         if st.button("Add to Portfolio.", icon="✅"):
@@ -117,7 +113,6 @@ else:
                             res3['Name'] = nombre
                             res3['Last Price'] = last_price
                             res3['Sector'] = sector
-                            # res3['P/E Ratio'] = 0
                             res3['Asset Class'] =  asset_class
                             res3['Allocation (%)'] = 0
                             
@@ -130,11 +125,10 @@ else:
         elif asset_class in ['Fixed Income']:   
         
             query = st.text_input("Search an Asset." )
-            # res1 = res1[res1['Fondo'].str.upper().str.contains(query.upper())]
             
             if len(query) >1:
 
-                res1 = db.read_assets_file()
+                res1 = db.read_assets_funds('assets')
                 res1 = res1[res1['Nombre'].str.upper().str.contains(query.upper())]
                 
                 if len (res1) == 0:
@@ -148,7 +142,6 @@ else:
                     
                     selected_company = st.selectbox("Select an Asset.", securities)
                     
-                    # selected_company = 'LETRAS REP PANAMA 0 08/14/2020'
                     
                     if selected_company != 'None':
                         res2 = res1[res1['Nombre']==selected_company].iloc[0]
@@ -163,7 +156,6 @@ else:
                             res3 = pd.DataFrame(columns=["Symbol", "Name",
                                                         "Last Price",
                                                             "Sector",
-                                                            # "P/E Ratio",
                                                             "Asset Class",
                                                             "Allocation (%)"],index=range(1))
                             
@@ -179,7 +171,6 @@ else:
                             res3['Name'] = nombre
                             res3['Last Price'] = 0
                             res3['Sector'] = sector
-                            # res3['P/E Ratio'] = 0
                             res3['Asset Class'] =  asset_class
                             res3['Allocation (%)'] = 0
                             
@@ -230,10 +221,8 @@ else:
                         
                         dfm.iloc[-1] = ['Name', company]
                         
-                        
                         dfm.columns=['Symbol',stock]
                         
-                        # print(dfm.T)
                         
                         if st.button("Add to Portfolio.", icon="✅"):
                            # Processed DF
@@ -283,12 +272,13 @@ else:
                                     st.write(f"**Business Summary:** {info.get('longBusinessSummary', 'N/A')}")
                                     
                             
-                            
-                            
+    col1, col2, col3, col4, col5, col6, col7, col8, col9, col10 = st.columns(10)      
+    
+    with col10:                  
+        st.button("Logout", on_click=auth.logout, type="primary")                        
+    
     st.header("Portfolio Table.")
-    
-    # st.text("From the sidebar, add the security of your preference and be aware of the risk profile constraints (review the Risk Matrix).")
-    
+        
     col1, col2 = st.columns([3,1])
     
     with col1:
@@ -355,8 +345,8 @@ else:
                                """, unsafe_allow_html=True)
                 
                 
-                                
-                st.dataframe(db.read_risk_matrix_file('max_allocation').iloc[:-2,:],
+                df_alloc = db.read_risk_matrix('max_allocation').iloc[:-2,:]           
+                st.dataframe(df_alloc,
                              hide_index = True,
                              width=1300, height=250)
                 
@@ -371,7 +361,7 @@ else:
                                             </style>
                                             """, unsafe_allow_html=True)
                                  
-                             st.data_editor(db.read_risk_matrix_file('max_allocation').iloc[:-2,:],
+                             st.data_editor(df_alloc,
                                           hide_index = True,
                                           num_rows = 'dynamic',
                                           width=1500, height=250)
@@ -396,17 +386,16 @@ else:
         'Money Market',
         'Stocks'], index=range(1)).T
         
-        agg_classes = db.read_risk_matrix_file('risk_matrix')
+        
+        agg_classes = db.read_risk_matrix('risk_matrix')
+        
         agg_classes = agg_classes[['asset_class', profile_option]]
         
         definicion = agg_classes.iloc[-1]
         
         agg_classes = agg_classes.iloc[:-2,:]
         
-        # dfr.columns = profile_optiond
-        
-        # st.text(definicion)
-        
+
         with st.expander(f'Allocation Limits for {profile_option} Profile.'):
             
              if st.button("Evaluate", disabled=False, type="secondary"):
@@ -415,10 +404,6 @@ else:
                 agg_classes = agg_classes.rename(columns={profile_option:f"{profile_option} (%)"})
                 
                 agg_classes = agg_classes.set_index('asset_class')
-                
-                # total_row = agg_classes.sum().to_frame().T
-                # total_row.index = ['Total']  # Rename index
-                # agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
                 
                 
                 st.markdown("""
@@ -441,10 +426,7 @@ else:
                 agg_classes = pd.concat([agg_classes, total_row], ignore_index=False)
                 
                 agg_classes = agg_classes.rename(columns={'Allocation (%)':'Allocated (%)'})
-                
-                # Reset index
-                # agg_classes = agg_classes.reset_index()
-    
+                    
                 
                 # EXTRA COLUMNS
                 agg_classes['Status'] = agg_classes.apply(lambda row: "✅" if row['Allocated (%)'] <= row[f"{profile_option} (%)"] else "⛔", axis=1)
@@ -453,38 +435,27 @@ else:
         
     
     st.divider()
-    # st.dataframe(manager.df)
-    
 
-    # edited_df = st.data_editor(
-    #     manager.df,
-    #     column_config={
-    #         # "Risk Profile": st.column_config.NumberColumn("Risk Profile"),
-    #         "Allocation (%)": st.column_config.NumberColumn("Allocation (%)", min_value=0),
-    #     },
-        
-    #     disabled=manager.df.columns[:-1],  # Disable editing on other columns if needed
-    #     hide_index=True,
-    #     num_rows = 'dynamic'
-    # )
-    
     # NEW SESSION DATAFRAME
-    manager.df = st.data_editor(
-        manager.df,
+    edited_df = st.data_editor(
+        st.session_state.session_frame,
         column_config={
-            # "Risk Profile": st.column_config.NumberColumn("Risk Profile"),
             "Allocation (%)": st.column_config.NumberColumn("Allocation (%)", min_value=0),
         },
-        
-        disabled=manager.df.columns[:-1],  # Disable editing on other columns if needed
+        disabled=st.session_state.session_frame.columns[:-1],  # Disable editing on other columns if needed
         hide_index=True,
-        num_rows = 'dynamic'
+        num_rows='dynamic'
     )
     
-    # AGGREGATE BY ASSET CLASS
     
+    # Update session state with the edited dataframe
+    if not edited_df.equals(st.session_state.session_frame):
+        st.session_state.session_frame = edited_df.copy()
+        
+
+    
+    # AGGREGATE BY ASSET CLASS
     agg_df = manager.df.groupby('Asset Class')['Allocation (%)'].sum()
-    print(agg_df)
     
     
     total_w = manager.df['Allocation (%)'].sum()

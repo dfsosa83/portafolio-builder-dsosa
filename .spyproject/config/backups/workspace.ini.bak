@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['mvp_app.py', 'utils\\state_manager.py', '..\\..\\..\\..\\..\\Desktop\\margen_env\\margen_app\\margen_app.py', 'utils\\data_fetcher.py', 'tester.py', 'query_users_db.py']
+recent_files = ['mvp_app.py', 'utils\\db_manager.py', 'utils\\state_manager.py', 'utils\\data_fetcher.py', 'tester.py', 'utils\\utility.py']
 
 [main]
 version = 0.2.0

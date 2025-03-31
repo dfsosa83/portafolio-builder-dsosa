@@ -84,6 +84,8 @@ class DataManager:
        print(data)
        new_row = data
        st.session_state[self.key] = pd.concat([self.df, new_row], ignore_index=True)
+     
+
     
     
     

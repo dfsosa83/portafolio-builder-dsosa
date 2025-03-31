@@ -6,7 +6,6 @@ Created on Tue Mar 18 13:36:46 2025
 """
 
 
-
 from utils.utility import Utility as util
 from utils.data_fetcher import DataFetcher as fetch
 
@@ -25,17 +24,6 @@ df2['Date'] = df2.index
 
 df2['LastDate'] = df2.apply(lambda x: df2[df2['Date'].dt.to_period('M') == x['Date'].to_period('M')]['Date'].max(), axis=1)
 df2['isLastDate'] = df2['Date'] == df2['LastDate']
-
-
-
-
-
-
-from utils.db_manager import PortfolioDB
-
-db = PortfolioDB()
-
-
 
 
 
