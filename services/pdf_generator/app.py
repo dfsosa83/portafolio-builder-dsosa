@@ -35,10 +35,10 @@ def generate_pdf():
         # Get data from the request
         data = request.json
         
-        # Fetch additional Yahoo Finance data
-        symbol = data.get("symbol", "AAPL")  # Default to Apple
-        stock_data = fetch_stock_data(symbol)
-        current_price = fetch_current_price(symbol)
+        # Comment out Yahoo Finance data fetching
+        # symbol = data.get("symbol", "AAPL")  # Default to Apple
+        # stock_data = fetch_stock_data(symbol)
+        # current_price = fetch_current_price(symbol)
         
         # Extract key information from the JSON payload
         role = data.get('role', 'N/A')
@@ -48,6 +48,7 @@ def generate_pdf():
         portfolio_alias = data.get('portfolio_alias', 'N/A')
         session_frame = data.get('session_frame', {})
         assets_information = data.get('assets_information', {})
+        asset_news = data.get('asset_news', {})
 
         # Create a PDF instance
         pdf = CustomPDF()
@@ -123,6 +124,25 @@ def generate_pdf():
                         f"Country: {country}",
                     border="B",
                 )
+                pdf.ln()
+
+        # Add asset_news section
+        if asset_news:
+            pdf.set_font("Arial", style="B", size=12)
+            pdf.cell(0, 10, "Asset News:", ln=True)
+
+            for symbol, news in asset_news.items():
+                pdf.set_font("Arial", style="B", size=11)
+                pdf.cell(0, 8, f"News for {symbol}:", ln=True)
+
+                pdf.set_font("Arial", size=10)
+                for title, links in news.items():
+                    pdf.multi_cell(0, 6, f"- {title}")
+                    for link in links:
+                        if link:  # Only include non-null links
+                            pdf.set_text_color(0, 0, 255)  # Blue for links
+                            pdf.cell(0, 6, link, ln=True, link=link)
+                    pdf.set_text_color(0)  # Reset text color to black
                 pdf.ln()
 
         # Save the PDF to a file
